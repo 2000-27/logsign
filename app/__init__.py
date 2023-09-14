@@ -5,15 +5,13 @@ from app.configs import DevConfig
 db = SQLAlchemy()
 ma = Marshmallow()
 
+def create_app():
+    app = Flask(__name__)
+    from .routes import new_mold
+    app.config.from_object(DevConfig)
+    app.register_blueprint(new_mold, url_prefix='/api')
+    db.init_app(app)
+   
+    return app
 
-app = Flask(__name__)
-from .routes import new_mold
-app.config.from_object(DevConfig)
-app.register_blueprint(new_mold, url_prefix='/api')
-db.init_app(app)
-with app.app_context():
-    db.create_all() 
-     
-
-
-
+app=create_app()
