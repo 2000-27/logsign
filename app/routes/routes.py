@@ -1,17 +1,16 @@
-from flask import request,jsonify, Blueprint
-
+from flask import request,jsonify, Blueprint, current_app
 from datetime import datetime,timedelta
 import jwt
- 
 import re
+from app.models import ManagementAccount
+from app.schema import signupSchema
+from app import db
 
 
 new_mold=Blueprint("auth",__name__)
-
+single_data = signupSchema()
 @new_mold.route('/register', methods =['POST'])
 def register():
-  from app import db
-  from app.models import ManagementAccount, single_data
   try:  
     json_body = request.get_json()
     msg = ''
@@ -19,12 +18,11 @@ def register():
         username = json_body['username']
         userpassword = json_body['userpassword']
         email = json_body['email']
-                  
         if not re.match(r'[^@]+@[^@]+\.[^@]+',email):
-           msg = 'Invalid email address !'
+           msg = 'INVALID EMAIL ADDRESS !!!!'
          
         elif not (re.match(r'[a-zA-Z0-9\s]+$', username)):
-           msg = 'Username must contain only characters  and space !!!!!'
+           msg = 'Username must contain only characters , digit  and space !!!!!'
         
         else:
                  msg = 'REGISTER SUCCESSFULLY!'
@@ -39,44 +37,28 @@ def register():
     return jsonify({"msg": msg})
 
 
-def checkpass(email):
-  from app.models import ManagementAccount, single_data
-  all_product=ManagementAccount.query.filter_by(email=email).first()
-
-  print("ALL PRODUCT: ",all_product)
-  result = single_data.dump(all_product)
-  
-  return result
-
 
 @new_mold.route('/login', methods =['POST'])
 def login():
     json_body = request.get_json()
-    from app import app 
+    
     msg = ''
     if request.method == 'POST':
         userpassword = json_body['userpassword']
         email = json_body['email']
-        print("password and email id iss => ",userpassword,email)
-    
         try:  
-           result=checkpass(email)
+           check_email=ManagementAccount.query.filter_by(email=email).first()
+           result = single_data.dump(check_email)
            if result=={}:
-               msg="PLEASE LOGIN !!!"
-               print(msg)
+               msg="PLEASE SIGNUP  !!!"
+               
            else:    
                msg="SIGN UP SUCCESSFULLY !!!!"
-               print(msg)  
-               token = jwt.encode({'public_id': 1,'exp' :str( datetime.utcnow() + timedelta(minutes = 30)) }, app.config['SECRET_KEY'])
-               print("your token is  =>>>>",token)
-               return jsonify(message="Login Succeeded!", access_token=token)
+               token = jwt.encode({'public_id': 1,'exp' :str( datetime.utcnow() + timedelta(minutes = 30)) }, current_app.config.get('SECRET_KEY'))
+               return jsonify(message="  LOGIN SUCCESSFULLY !!! ", access_token=token)
                
- 
         except  Exception as error:
-          msg= 'there is no user '
-          print("your exception is ",error) 
-            
-
-
+          msg= 'THERE IS NO USER !!!!'
+        
         return jsonify({"msg": msg})
 
