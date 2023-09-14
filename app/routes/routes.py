@@ -1,5 +1,4 @@
-from flask import request,jsonify, Blueprint, current_app
-# from app import db,app,new_mold
+from flask import request,jsonify, Blueprint
 
 from datetime import datetime,timedelta
 import jwt
@@ -36,18 +35,17 @@ def register():
                  return single_data.jsonify(new_product)
         return jsonify(username,userpassword,email,msg)
   except :
-    msg="ALREADY RECORD IS EXIT "
+    msg="RECORD IS EXIT !!!!!!!!!!!!! "
     return jsonify({"msg": msg})
 
 
 def checkpass(email):
-  from app import db
   from app.models import ManagementAccount, single_data
   all_product=ManagementAccount.query.filter_by(email=email).first()
 
   print("ALL PRODUCT: ",all_product)
   result = single_data.dump(all_product)
-  print("your emai id is correct and result is => ",result)
+  
   return result
 
 
